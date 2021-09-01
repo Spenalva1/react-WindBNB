@@ -1,0 +1,82 @@
+import { createContext, ReactNode, useContext, useState } from 'react';
+
+export interface Filter {
+  location: string;
+  guests: number;
+}
+
+export const initialFilter: Filter = {
+  location: '',
+  guests: 0,
+};
+
+interface ContextProps {
+  filterOpen: boolean;
+  filter: Filter;
+  openFilter: Function;
+  closeFilter: Function;
+  toggleFilter: Function;
+  setFilter: Function;
+  setGuests: Function;
+  setLocation: Function;
+}
+
+const LocalStateContext = createContext({} as ContextProps);
+const LocalStateProvider = LocalStateContext.Provider;
+
+const FilterStateProvider = ({ children }: { children: ReactNode }) => {
+  // This is our own custom provider! We will store data (state) and functionality (updaters) in here and anyone can access ir via the consumer!
+  const [filter, setFilter] = useState<Filter>(initialFilter);
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const toggleFilter = () => {
+    setFilterOpen(!filterOpen);
+  };
+
+  const closeFilter = () => {
+    setFilterOpen(false);
+  };
+
+  const openFilter = () => {
+    setFilterOpen(true);
+  };
+
+  const setLocation = (location: string) => {
+    setFilter((filter) => ({
+      ...filter,
+      location,
+    }));
+  };
+
+  const setGuests = (guests: number) => {
+    setFilter((filter) => ({
+      ...filter,
+      guests,
+    }));
+  };
+
+  return (
+    <LocalStateProvider
+      value={{
+        filterOpen,
+        filter,
+        openFilter,
+        closeFilter,
+        toggleFilter,
+        setFilter,
+        setGuests,
+        setLocation,
+      }}
+    >
+      {children}
+    </LocalStateProvider>
+  );
+};
+
+// make a custom hook for accessing the filter local state
+const useFilter = () => {
+  const all = useContext(LocalStateContext);
+  return all;
+};
+
+export { FilterStateProvider, useFilter };

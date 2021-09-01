@@ -1,17 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import Dashboard from './components/Dashboard';
+import FilterModal from './components/FilterModal';
+import Header from './components/Header';
+import { FilterStateProvider } from './lib/filterState';
+import { StaysStateProvider } from './lib/staysState';
+import GlobalStyles, { ContainerStyles } from './styles/GlobalStyles';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <GlobalStyles />
+    <FilterStateProvider>
+      <StaysStateProvider>
+        <FilterModal></FilterModal>
+        <ContainerStyles>
+          <Header />
+          <Dashboard />
+        </ContainerStyles>
+      </StaysStateProvider>
+    </FilterStateProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
