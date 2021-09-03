@@ -50,8 +50,8 @@ const CounterStyles = styled.div`
     align-items: center;
     font-size: 2rem;
     background: white;
-    border: 1px solid #828282;
-    color: #828282;
+    border: 1px solid var(--grey);
+    color: var(--grey);
     border-radius: 0.4rem;
   }
 

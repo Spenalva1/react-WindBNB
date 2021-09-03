@@ -13,6 +13,10 @@ import LocationInput from './LocationInput';
 import GuestsInput from './GuestsInput';
 import useWidth from '../lib/useWidth';
 
+const FILTER_WIDTH_BREAKPOINT = 650;
+
+const handleWidth = (width: number) => width <= FILTER_WIDTH_BREAKPOINT;
+
 export default function Filter() {
   const { filter, setFilter, closeFilter, resetFilter } = useFilter();
   const { width } = useWidth();
@@ -23,14 +27,13 @@ export default function Filter() {
     };
   });
   const [activeFilter, setActiveFilter] = useState<1 | 2>(1);
-  const [mobile, setMobile] = useState<boolean>(() => width <= 650);
+  const [mobile, setMobile] = useState<boolean>(() => handleWidth(width));
 
   useEffect(() => {
-    setMobile(width <= 650);
+    setMobile(handleWidth(width));
   }, [width]);
 
   const onSearch = () => {
-    setFilter(localFilter);
     setFilter(localFilter);
     closeFilter();
   };

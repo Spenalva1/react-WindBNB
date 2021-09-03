@@ -29,13 +29,12 @@ const StaysStateProvider = ({ children }: { children: ReactNode }) => {
   const { filter } = useFilter();
 
   useEffect(() => {
+    console.log(filter.guests);
     setFilteredStays(
       staysData.filter((stay) => {
         const locationCheck =
           filter.location === '' || filter.location.includes(stay.city);
-        const guestsCheck =
-          filter.guests <= stay.maxGuests ||
-          filter.location.includes(stay.city);
+        const guestsCheck = filter.guests <= stay.maxGuests;
         return locationCheck && guestsCheck;
       })
     );
