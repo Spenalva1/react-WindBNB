@@ -25,6 +25,7 @@ const GlobalStyles = createGlobalStyle`
     margin: 0;
     font-size: 1.5rem;
     line-height: 2;
+    width: 100%;
   }
   a {
     text-decoration: none;
@@ -44,7 +45,7 @@ const GlobalStyles = createGlobalStyle`
 export const ContainerStyles = styled.div`
   max-width: var(--maxWidth);
   margin: 0 auto;
-  padding: 4rem 2rem;
+  padding: 4rem 2rem 2rem 2rem;
 `;
 
 export default GlobalStyles;

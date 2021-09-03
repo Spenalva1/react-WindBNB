@@ -1,51 +1,43 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import {
-  Filter as FilterType,
+  IFilter as FilterType,
   initialFilter,
   useFilter,
 } from '../lib/filterState';
-import { stays } from '../data/stays';
-import { Stay } from '../lib/staysState';
-import { useEffect } from 'react';
-import Counter from './Counter';
-
-const locations = Object.keys(
-  stays.reduce((obj: any, stay: Stay) => {
-    const location = `${stay.city}, ${stay.country}`;
-    if (!obj[location]) {
-      obj[location] = 1;
-    }
-    return obj;
-  }, {})
-);
+import LocationFilter from './LocationFilter';
+import GuestsFilter from './GuestsFilter';
+import { useCallback } from 'react';
+import FilterButton from './FilterButton';
+import LocationInput from './LocationInput';
+import GuestsInput from './GuestsInput';
+import useWidth from '../lib/useWidth';
 
 export default function Filter() {
-  const { filter, setFilter, closeFilter } = useFilter();
+  const { filter, setFilter, closeFilter, resetFilter } = useFilter();
+  const { width } = useWidth();
   const [localFilter, setLocalfilter] = useState<FilterType>(() => {
     return {
       guests: filter.guests,
       location: filter.location,
     };
   });
-  const [childrenCount, setChildrenCount] = useState(0);
-  const [adultCount, setAdultCount] = useState(0);
   const [activeFilter, setActiveFilter] = useState<1 | 2>(1);
+  const [mobile, setMobile] = useState<boolean>(() => width <= 650);
 
   useEffect(() => {
-    setLocalfilter((filter: FilterType) => ({
-      ...filter,
-      guests: childrenCount + adultCount,
-    }));
-  }, [childrenCount, adultCount]);
+    setMobile(width <= 650);
+  }, [width]);
 
   const onSearch = () => {
+    setFilter(localFilter);
     setFilter(localFilter);
     closeFilter();
   };
 
   const onReset = () => {
-    setFilter(initialFilter);
+    setLocalfilter(initialFilter);
+    resetFilter();
     closeFilter();
   };
 
@@ -56,99 +48,67 @@ export default function Filter() {
     }));
   };
 
+  const setGuests = useCallback((guests: number) => {
+    setLocalfilter((filter: FilterType) => ({
+      ...filter,
+      guests,
+    }));
+  }, []);
+
   return (
     <FilterStyles>
-      <div className="filter__bar filter__row">
-        <div
+      <div className={`filter__bar filter__row ${mobile && 'mobile'}`}>
+        <LocationInput
+          location={localFilter.location}
           onClick={() => setActiveFilter(1)}
-          className={`filter__bar__item ${activeFilter === 1 ? 'active' : ''}`}
-        >
-          <label className="filter__bar__item__label">LOCATION</label>
-
-          {localFilter.location && !!localFilter?.location?.length ? (
-            <p className="filter__bar__item__value">{localFilter.location}</p>
-          ) : (
-            <p className="filter__bar__item__value empty">Add location</p>
-          )}
-        </div>
-        <div
+          className={activeFilter === 1 ? 'active' : ''}
+        />
+        <GuestsInput
+          guests={localFilter.guests}
           onClick={() => setActiveFilter(2)}
-          className={`filter__bar__item ${activeFilter === 2 ? 'active' : ''}`}
-        >
-          <label className="filter__bar__item__label">GUESTS</label>
-          {localFilter.guests && localFilter?.guests > 0 ? (
-            <p className="filter__bar__item__value">{localFilter.guests}</p>
-          ) : (
-            <p className="filter__bar__item__value empty">Add guests</p>
-          )}
-        </div>
-        <div className="filter__bar__item filter__bar__button-ctn">
-          <button
-            onClick={onSearch}
-            className="filter__bar__button"
-            type="button"
-          >
-            <span className="material-icons md-18">search</span>
-            Search
-          </button>
-          <button
-            onClick={onReset}
-            className="filter__bar__button"
-            type="button"
-          >
-            <span className="material-icons md-18">close</span>
-            Reset
-          </button>
-        </div>
+          className={activeFilter === 2 ? 'active' : ''}
+        />
+        {!mobile && (
+          <div className="filter__bar__item filter__bar__button-ctn">
+            <FilterButton fn={onSearch} icon={'search'} text={'Search'} />
+            <FilterButton fn={onReset} icon={'close'} text={'Reset'} />
+          </div>
+        )}
       </div>
-      <div className="filter__selects filter__row">
-        <div className="select__wrapper">
-          {activeFilter === 1 && (
-            <div className="filter__select">
-              {locations.map((location) => (
-                <div
-                  key={location}
-                  onClick={() => setLocation(location)}
-                  className="filter__select__location__item"
-                >
-                  <span className="material-icons md-18">place</span>
-                  {location}
-                </div>
-              ))}
-            </div>
-          )}
+      {!mobile && (
+        <div className="filter__selects filter__row">
+          <div>
+            {activeFilter === 1 && <LocationFilter setLocation={setLocation} />}
+          </div>
+          <div>
+            {activeFilter === 2 && <GuestsFilter setGuests={setGuests} />}
+          </div>
+          <div></div>
         </div>
-        <div className="select__wrapper">
-          {activeFilter === 2 && (
-            <div className="filter__select">
-              <div className="filter__select__guests__item">
-                <label className="filter__label">Adults</label>
-                <span className="filter__info">Ages 12 or above</span>
-                <Counter
-                  counter={childrenCount}
-                  setCounter={setChildrenCount}
-                ></Counter>
-              </div>
-              <div className="filter__select__guests__item">
-                <label className="filter__label">Children</label>
-                <span className="filter__info">Ages 2-12</span>
-                <Counter
-                  counter={adultCount}
-                  setCounter={setAdultCount}
-                ></Counter>
-              </div>
-            </div>
-          )}
+      )}
+      {mobile && (
+        <div className="filter__selects mobile">
+          {activeFilter === 1 && <LocationFilter setLocation={setLocation} />}
+          {activeFilter === 2 && <GuestsFilter setGuests={setGuests} />}
         </div>
-        <div></div>
-      </div>
+      )}
+      {mobile && (
+        <div className="mobile filter__bar__item filter__bar__button-ctn">
+          <FilterButton fn={onSearch} icon={'search'} text={'Search'} />
+          <FilterButton fn={onReset} icon={'close'} text={'Reset'} />
+        </div>
+      )}
     </FilterStyles>
   );
 }
 
 const FilterStyles = styled.div`
   width: 100%;
+  height: 100%;
   font-family: 'Mulish', sans-serif;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
 
   .filter__row {
     width: 100%;
@@ -160,6 +120,12 @@ const FilterStyles = styled.div`
       flex-direction: column;
       padding: 0.7rem 2rem;
     }
+  }
+
+  .filter__selects.mobile {
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
 
   .filter__bar {
@@ -194,60 +160,20 @@ const FilterStyles = styled.div`
     }
 
     &__button-ctn {
-      align-items: center;
-    }
-
-    &__button {
-      cursor: pointer;
-      border-radius: 1.6rem;
       display: flex;
+      flex-direction: row;
+      gap: 1rem;
       align-items: center;
-      border: none;
-      background-color: var(--orange);
-      color: var(--white);
-      gap: 0.6rem;
-      padding: 0 2rem;
-      height: 100%;
+      width: 100%;
+      align-self: flex-end;
     }
-  }
 
-  .filter__bar__button-ctn {
-    display: flex;
-    flex-direction: row;
-    gap: 1rem;
+    &.mobile {
+      flex-direction: column;
+    }
   }
 
   .select__wrapper {
     padding: 4rem 2rem;
-  }
-
-  .filter__select__location__item {
-    cursor: pointer;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    color: #4f4f4f;
-    span {
-      margin-right: 0.5rem;
-    }
-  }
-
-  .filter__select__guests__item {
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 4rem;
-  }
-
-  .filter__label {
-    font-size: 1.4rem;
-    font-weight: 800;
-    line-height: 1.8rem;
-  }
-
-  .filter__info {
-    font-weight: 400;
-    font-size: 1.4rem;
-    line-height: 1.8rem;
-    color: var(--lightGrey);
   }
 `;
