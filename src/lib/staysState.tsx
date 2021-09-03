@@ -29,7 +29,6 @@ const StaysStateProvider = ({ children }: { children: ReactNode }) => {
   const { filter } = useFilter();
 
   useEffect(() => {
-    console.log(filter.guests);
     setFilteredStays(
       staysData.filter((stay) => {
         const locationCheck =
